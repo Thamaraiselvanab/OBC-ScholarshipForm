@@ -549,14 +549,86 @@ const PublicForm = () => {
               </div>
             </FormSection>
 
-            <div className="mt-12 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-              <label className="flex items-start gap-4 cursor-pointer">
+            <div className="mt-12 space-y-6">
+              <div className="h-60 overflow-y-auto p-6 bg-slate-50 rounded-2xl border border-slate-200 text-sm text-slate-600 leading-relaxed custom-scrollbar shadow-inner">
+                <div className="space-y-4">
+                  <p className="font-bold text-slate-900">Society for the Rights of Backward and Most Backward Classes (SFRBC) and OBC Rights Invites Applications from Plus two (+2) Students for our OBC Students Scholarship Programme</p>
+                  
+                  <p>
+                    <span className="font-bold">1. Our Organisation SFRBC / OBC Rights</span> provide scholarship for poor and meritorious students from BC and MBC Communities. Scholarship will be provided on the basis of marks and poverty to the students who want to join in engineering and arts college. The Scholarship is provided from our Organisation’s funds only.
+                  </p>
+
+                  <div>
+                    <p className="font-bold mb-2">2. Eligibility:</p>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex gap-2"><span>a.</span> <span>The applicants ought to have secured more than 75% marks in Plus two 2026 exams</span></li>
+                      <li className="flex gap-2"><span>b.</span> <span>They must be from BC or MBC (OBC) Communities</span></li>
+                      <li className="flex gap-2"><span>c.</span> <span>The annual income of the parents or family must be below Rs. 4.2 lakhs per year or Rs. 35,000 per month</span></li>
+                      <li className="flex gap-2"><span>d.</span> <span>Preference will be given to the students who do not have parents or living in poor conditions.</span></li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <p className="font-bold mb-2">3. How to apply:</p>
+                    <p className="mb-2">You should apply by filling the following columns in our website <a href="https://www.obcrights.org" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:underline">www.obcrights.org</a> and submit:</p>
+                    <ul className="space-y-1 pl-4 border-l-2 border-slate-200 mb-4">
+                      <li>a. Full Name:</li>
+                      <li>b. Full Address:</li>
+                      <li>c. Email ID and Mobile Numbers:</li>
+                      <li>d. Date of Birth:</li>
+                    </ul>
+                    <p className="mb-2 font-medium">Then you must scan and upload the following documents:</p>
+                    <ul className="space-y-1 pl-4 border-l-2 border-slate-200 mb-4">
+                      <li>a. Plus Two marksheet</li>
+                      <li>b. BC / MBC Certificate</li>
+                      <li>c. Income Affidavit</li>
+                    </ul>
+                    <div className="bg-white p-5 rounded-xl border border-slate-200 italic text-slate-700 shadow-sm">
+                      <p className="mb-3 font-bold not-italic text-slate-900">Fill the following income affidavit:</p>
+                      <p className="mb-6">“We ………… (student name) and ……… (Father’s name) hereby solemnly affirm and sincerely state that our income per year is Rs. ………. (………… only in words)”.</p>
+                      <div className="flex flex-col sm:flex-row justify-between gap-4 text-[10px] font-black uppercase tracking-widest opacity-40">
+                        <div className="flex flex-col items-center">
+                          <div className="h-px w-24 bg-slate-300 mb-1"></div>
+                          <span>Signature of the Parent</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="h-px w-24 bg-slate-300 mb-1"></div>
+                          <span>Signature of the Student</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p>
+                    <span className="font-bold">4.</span> Those who wish to send the aforesaid details by individual mail or by hard copies (in paper), may kindly send it to the following, mail id and address before 30.05.2026 evening.
+                  </p>
+
+                  <div className="p-4 bg-white rounded-xl border border-slate-100 shadow-sm space-y-1">
+                    <p><span className="font-bold text-slate-900">Mail ID:</span> <a href="mailto:jacofbc@gmail.com" className="text-red-600 hover:underline">jacofbc@gmail.com</a></p>
+                    <p><span className="font-bold text-slate-900">Address:</span> Shri SS Globals, 42, West Club Road, Racecourse, Coimbatore – 641018.</p>
+                  </div>
+
+                  <p className="font-black text-red-600 flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    For all your doubts, please contact the toll-free number: 1800 8900 403
+                  </p>
+
+                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3">
+                    <Info className="w-5 h-5 text-amber-600 shrink-0" />
+                    <p className="text-xs text-amber-900 font-medium leading-relaxed">
+                      <span className="font-bold">Note:</span> Please note that the decision of the organisation is final and no one is entitled to make any claims.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <label className="flex items-center gap-4 cursor-pointer p-4 bg-white border border-slate-200 rounded-xl transition-all hover:bg-slate-50 group">
                 <input 
                   type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} 
-                  className="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" 
+                  className="w-5 h-5 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer" 
                 />
-                <span className="text-sm font-medium text-slate-600 leading-relaxed">
-                  I hereby declare that all the information provided above is true and correct to the best of my knowledge. I understand that any false information will lead to disqualification from the scholarship programme.
+                <span className="text-sm font-bold text-slate-700 select-none group-hover:text-slate-900">
+                  I have read all the terms and conditions.
                 </span>
               </label>
             </div>
