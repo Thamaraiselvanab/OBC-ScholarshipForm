@@ -53,6 +53,27 @@ const InputField = ({ label, name, icon: Icon, error, ...props }) => (
   </div>
 );
 
+const SelectField = ({ label, name, icon: Icon, options, error, ...props }) => (
+  <div className="space-y-2">
+    <label className="text-sm font-bold text-slate-700 ml-1">{label}</label>
+    <div className="relative">
+      {Icon && <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />}
+      <select
+        name={name}
+        className={`w-full bg-white border ${error ? 'border-red-500' : 'border-slate-200'} rounded-xl py-3 ${Icon ? 'pl-12' : 'px-4'} pr-10 text-slate-900 focus:outline-none focus:border-red-500 transition-all appearance-none cursor-pointer`}
+        {...props}
+      >
+        <option value="">Select Year</option>
+        {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+      </select>
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+        <ChevronRight className="w-4 h-4 text-slate-400 rotate-90" />
+      </div>
+    </div>
+    {error && <p className="text-xs text-red-600 font-medium ml-1">{error}</p>}
+  </div>
+);
+
 const CustomDatePicker = ({ label, value, onChange, error }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState('days'); 
@@ -515,7 +536,16 @@ const PublicForm = () => {
               <div className="md:col-span-2">
                 <InputField label="Institution Name (School/College)" name="school" placeholder="Full Institution Name" icon={GraduationCap} required value={formData.school} onChange={handleInputChange} error={errors.school} />
               </div>
-              <InputField label="Year of Graduation" name="passed_out_year" placeholder="e.g. 2025" icon={Calendar} required value={formData.passed_out_year} onChange={handleInputChange} error={errors.passed_out_year} />
+              <SelectField 
+                label="Year of Graduation" 
+                name="passed_out_year" 
+                icon={Calendar} 
+                required 
+                value={formData.passed_out_year} 
+                onChange={handleInputChange} 
+                error={errors.passed_out_year}
+                options={Array.from({ length: 11 }, (_, i) => (2020 + i).toString())}
+              />
             </FormSection>
 
             <FormSection title="Required Documents" icon={FileText}>
@@ -839,7 +869,15 @@ const EditModal = ({ app, onClose, onSave }) => {
               <div className="md:col-span-2">
                 <InputField label="Institution" name="school" value={formData.school || ''} onChange={handleInputChange} icon={GraduationCap} error={errors.school} />
               </div>
-              <InputField label="Graduation Year" name="passed_out_year" value={formData.passed_out_year || ''} onChange={handleInputChange} icon={Calendar} error={errors.passed_out_year} />
+              <SelectField 
+                label="Graduation Year" 
+                name="passed_out_year" 
+                value={formData.passed_out_year || ''} 
+                onChange={handleInputChange} 
+                icon={Calendar} 
+                error={errors.passed_out_year}
+                options={Array.from({ length: 11 }, (_, i) => (2020 + i).toString())}
+              />
               <div className="md:col-span-2">
                 <InputField label="Permanent Address" name="address" value={formData.address || ''} onChange={handleInputChange} icon={MapPin} error={errors.address} />
               </div>
