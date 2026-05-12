@@ -197,10 +197,9 @@ const CustomDatePicker = ({ label, value, onChange, error }) => {
 // --- PAGES ---
 
 const PublicForm = () => {
-  const [formData, setFormData] = useState({
     name: '', email: '', phone: '', dob: '', 
     parents_name: '', parent_phone: '', address: '', 
-    school: '', passed_out_year: ''
+    school: '', school_address: '', passed_out_year: ''
   });
 
   const [files, setFiles] = useState({ communityCertificate: null, incomeCertificate: null, bonofide: null });
@@ -350,7 +349,7 @@ const PublicForm = () => {
     e.preventDefault();
     const newErrors = {};
     // Check form fields
-    const fieldsToValidate = ['name', 'email', 'phone', 'dob', 'parents_name', 'parent_phone', 'address', 'school', 'passed_out_year'];
+    const fieldsToValidate = ['name', 'email', 'phone', 'dob', 'parents_name', 'parent_phone', 'address', 'school', 'school_address', 'passed_out_year'];
     fieldsToValidate.forEach(key => {
       const error = validateField(key, formData[key]);
       if (error) newErrors[key] = error;
@@ -533,9 +532,8 @@ const PublicForm = () => {
             </FormSection>
 
             <FormSection title="Academic Details" icon={GraduationCap}>
-              <div className="md:col-span-2">
-                <InputField label="Institution Name (School/College)" name="school" placeholder="Full Institution Name" icon={GraduationCap} required value={formData.school} onChange={handleInputChange} error={errors.school} />
-              </div>
+              <InputField label="Institution Name" name="school" placeholder="School/College Name" icon={GraduationCap} required value={formData.school} onChange={handleInputChange} error={errors.school} />
+              <InputField label="Institution Address" name="school_address" placeholder="City/Location" icon={MapPin} required value={formData.school_address} onChange={handleInputChange} error={errors.school_address} />
               <SelectField 
                 label="Year of Graduation" 
                 name="passed_out_year" 
@@ -767,6 +765,7 @@ const EditModal = ({ app, onClose, onSave }) => {
     else if (formData.parent_phone.length !== 10) newErrors.parent_phone = 'Must be 10 digits';
 
     if (!formData.school?.trim()) newErrors.school = 'Required';
+    if (!formData.school_address?.trim()) newErrors.school_address = 'Required';
     if (!formData.passed_out_year?.trim()) newErrors.passed_out_year = 'Required';
     if (!formData.address?.trim()) newErrors.address = 'Required';
 
@@ -866,9 +865,8 @@ const EditModal = ({ app, onClose, onSave }) => {
               </div>
               <InputField label="Parent Name" name="parents_name" value={formData.parents_name || ''} onChange={handleInputChange} icon={User} error={errors.parents_name} />
               <InputField label="Parent Phone" name="parent_phone" value={formData.parent_phone || ''} onChange={handleInputChange} icon={Phone} error={errors.parent_phone} />
-              <div className="md:col-span-2">
-                <InputField label="Institution" name="school" value={formData.school || ''} onChange={handleInputChange} icon={GraduationCap} error={errors.school} />
-              </div>
+              <InputField label="Institution Name" name="school" value={formData.school || ''} onChange={handleInputChange} icon={GraduationCap} error={errors.school} />
+              <InputField label="Institution Address" name="school_address" value={formData.school_address || ''} onChange={handleInputChange} icon={MapPin} error={errors.school_address} />
               <SelectField 
                 label="Graduation Year" 
                 name="passed_out_year" 
@@ -973,6 +971,7 @@ const AdminDashboard = () => {
         parent_phone: updatedData.parent_phone,
         address: updatedData.address,
         school: updatedData.school,
+        school_address: updatedData.school_address,
         passed_out_year: updatedData.passed_out_year,
         community_certificate_url: updatedData.community_certificate_url,
         income_certificate_url: updatedData.income_certificate_url,
@@ -1015,7 +1014,7 @@ const AdminDashboard = () => {
     }
     
     // Define headers
-    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "Institution", "Graduation Year", "Address", "Community Cert URL", "Income Cert URL", "Bonofide Cert URL", "Applied At"];
+    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "Institution Name", "Institution Address", "Graduation Year", "Address", "Community Cert URL", "Income Cert URL", "Bonofide Cert URL", "Applied At"];
     
     // Map data to rows
     const rows = applications.map(app => [
@@ -1026,6 +1025,7 @@ const AdminDashboard = () => {
       `"${(app.parents_name || '').replace(/"/g, '""')}"`,
       `'${app.parent_phone || ''}`,
       `"${(app.school || '').replace(/"/g, '""')}"`,
+      `"${(app.school_address || '').replace(/"/g, '""')}"`,
       `"${app.passed_out_year || ''}"`,
       `"${(app.address || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
       `"${app.community_certificate_url || ''}"`,
@@ -1113,7 +1113,8 @@ const AdminDashboard = () => {
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">DOB</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Name</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Phone</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Institution</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Institution Name</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Institution Address</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Year of Graduation</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Address</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Docs</th>
@@ -1129,7 +1130,8 @@ const AdminDashboard = () => {
                         <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap">{app.dob ? new Date(app.dob).toLocaleDateString('en-GB') : '—'}</td>
                         <td className="px-4 py-4 text-xs font-black text-slate-900 border-r border-slate-100 whitespace-nowrap">{app.parents_name || '—'}</td>
                         <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.parent_phone || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[250px] truncate">{app.school || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.school || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.school_address || '—'}</td>
                         <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.passed_out_year || '—'}</td>
                         <td className="px-4 py-4 text-[10px] font-medium text-slate-500 border-r border-slate-100 max-w-[300px] truncate" title={app.address}>{app.address || '—'}</td>
                         <td className="px-4 py-4">
@@ -1184,8 +1186,12 @@ const AdminDashboard = () => {
                       <span className="text-[11px] font-bold text-slate-700">{app.parent_phone || '—'}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Institution</span>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Institution Name</span>
                       <span className="text-[11px] font-bold text-slate-700 truncate block">{app.school || '—'}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Institution Address</span>
+                      <span className="text-[11px] font-medium text-slate-500 truncate block">{app.school_address || '—'}</span>
                     </div>
                     <div>
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Grad Year</span>
