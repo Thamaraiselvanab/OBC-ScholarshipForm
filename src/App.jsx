@@ -942,31 +942,31 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-3">
+      <nav className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex flex-col sm:flex-row items-center justify-between sticky top-0 z-50 gap-4">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="bg-red-600 p-2 rounded-lg"><ShieldCheck className="w-5 h-5 text-white" /></div>
-          <span className="font-black text-slate-900 tracking-tight">OBC ADMIN DASHBOARD</span>
+          <span className="font-black text-slate-900 tracking-tight whitespace-nowrap">OBC ADMIN DASHBOARD</span>
         </div>
-        <div className="flex items-center gap-4 md:gap-8">
-          <p className="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest">Total Applications: {applications.length}</p>
+        <div className="flex items-center justify-between sm:justify-end gap-4 md:gap-8 w-full sm:w-auto">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total: {applications.length}</p>
           <div className="flex items-center gap-4">
             <button 
               onClick={handleExport}
-              className="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-4 py-2 rounded-xl font-black text-xs transition-all uppercase tracking-widest border border-emerald-100"
+              className="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-3 md:px-4 py-2 rounded-xl font-black text-[10px] md:text-xs transition-all uppercase tracking-widest border border-emerald-100"
             >
-              <Download className="w-4 h-4" /> Export CSV
+              <Download className="w-4 h-4" /> <span className="hidden xs:inline">Export</span>
             </button>
-            <button onClick={handleLogout} className="flex items-center gap-2 text-slate-900 hover:text-red-600 font-black text-sm transition-colors border-l border-slate-200 pl-4 ml-2">
-              <LogOut className="w-4 h-4" /> Logout
+            <button onClick={handleLogout} className="flex items-center gap-2 text-slate-900 hover:text-red-600 font-black text-sm transition-colors border-l border-slate-200 pl-4">
+              <LogOut className="w-4 h-4" /> <span className="hidden xs:inline">Logout</span>
             </button>
           </div>
         </div>
       </nav>
 
-      <div className="p-6 md:p-8">
-        <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Scholarship Applications</h1>
-          <div className="relative w-full md:w-96">
+      <div className="p-4 md:p-8">
+        <div className="mb-8 flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+          <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Scholarship Applications</h1>
+          <div className="relative w-full lg:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input 
               type="text" placeholder="Search students..." 
@@ -976,71 +976,125 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left border-collapse min-w-[1600px]">
-              <thead>
-                <tr className="bg-slate-900 text-white">
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Student Name</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Email Address</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Phone No</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">DOB</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Name</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Phone</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Institution</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Year of Graduation</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Address</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Docs</th>
-                  <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {loading ? (
-                  <tr><td colSpan="10" className="px-6 py-20 text-center"><Loader2 className="w-10 h-10 text-red-600 animate-spin mx-auto mb-4" /><p className="font-bold text-slate-400">Loading Data...</p></td></tr>
-                ) : filtered.length === 0 ? (
-                  <tr><td colSpan="10" className="px-6 py-20 text-center text-slate-400 font-bold">No Records Found</td></tr>
-                ) : filtered.map((app) => (
-                  <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-4 font-black text-slate-900 border-r border-slate-100 whitespace-nowrap">{app.name}</td>
-                    <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.email}</td>
-                    <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.phone}</td>
-                    <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap">{app.dob ? new Date(app.dob).toLocaleDateString('en-GB') : '—'}</td>
-                    <td className="px-4 py-4 text-xs font-black text-slate-900 border-r border-slate-100 whitespace-nowrap">{app.parents_name || '—'}</td>
-                    <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.parent_phone || '—'}</td>
-                    <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[250px] truncate">{app.school || '—'}</td>
-                    <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.passed_out_year || '—'}</td>
-                    <td className="px-4 py-4 text-[10px] font-medium text-slate-500 border-r border-slate-100 max-w-[300px] truncate" title={app.address}>{app.address || '—'}</td>
-                    <td className="px-4 py-4">
-                      <div className="flex gap-2">
-                        <MiniDocLink href={app.community_certificate_url} label="C" />
-                        <MiniDocLink href={app.income_certificate_url} label="I" />
-                        <MiniDocLink href={app.bonofide_url} label="B" />
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => setEditingApp(app)}
-                          className="p-2 bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-600 rounded-lg transition-all border border-slate-200"
-                          title="Edit Application"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(app.id)}
-                          className="p-2 bg-red-50 hover:bg-red-600 hover:text-white text-red-600 rounded-lg transition-all border border-red-100"
-                          title="Delete Application"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {loading ? (
+          <div className="py-20 text-center bg-white rounded-2xl border border-slate-200 shadow-xl">
+            <Loader2 className="w-10 h-10 text-red-600 animate-spin mx-auto mb-4" />
+            <p className="font-bold text-slate-400">Loading Data...</p>
           </div>
-        </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-20 text-center bg-white rounded-2xl border border-slate-200 shadow-xl text-slate-400 font-bold">
+            No Records Found
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse min-w-[1600px]">
+                  <thead>
+                    <tr className="bg-slate-900 text-white">
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Student Name</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Email Address</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Phone No</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">DOB</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Name</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Phone</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Institution</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Year of Graduation</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Address</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Docs</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filtered.map((app) => (
+                      <tr key={app.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-4 font-black text-slate-900 border-r border-slate-100 whitespace-nowrap">{app.name}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.email}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.phone}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap">{app.dob ? new Date(app.dob).toLocaleDateString('en-GB') : '—'}</td>
+                        <td className="px-4 py-4 text-xs font-black text-slate-900 border-r border-slate-100 whitespace-nowrap">{app.parents_name || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.parent_phone || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[250px] truncate">{app.school || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.passed_out_year || '—'}</td>
+                        <td className="px-4 py-4 text-[10px] font-medium text-slate-500 border-r border-slate-100 max-w-[300px] truncate" title={app.address}>{app.address || '—'}</td>
+                        <td className="px-4 py-4">
+                          <div className="flex gap-2">
+                            <MiniDocLink href={app.community_certificate_url} label="C" />
+                            <MiniDocLink href={app.income_certificate_url} label="I" />
+                            <MiniDocLink href={app.bonofide_url} label="B" />
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex gap-2">
+                            <button onClick={() => setEditingApp(app)} className="p-2 bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-600 rounded-lg transition-all border border-slate-200"><Edit className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => handleDelete(app.id)} className="p-2 bg-red-50 hover:bg-red-600 hover:text-white text-red-600 rounded-lg transition-all border border-red-100"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filtered.map((app) => (
+                <div key={app.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden flex flex-col">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="max-w-[70%]">
+                      <h3 className="font-black text-slate-900 leading-tight truncate">{app.name}</h3>
+                      <p className="text-[10px] font-bold text-slate-400 mt-0.5 truncate">{app.email}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditingApp(app)} className="p-2 bg-slate-50 text-slate-600 rounded-lg border border-slate-200"><Edit className="w-3 h-3" /></button>
+                      <button onClick={() => handleDelete(app.id)} className="p-2 bg-red-50 text-red-600 rounded-lg border border-red-100"><Trash2 className="w-3 h-3" /></button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-4 border-t border-slate-50 pt-4 flex-grow">
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Phone</span>
+                      <span className="text-[11px] font-bold text-slate-700">{app.phone}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">DOB</span>
+                      <span className="text-[11px] font-bold text-slate-700">{app.dob ? new Date(app.dob).toLocaleDateString('en-GB') : '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Parent Name</span>
+                      <span className="text-[11px] font-black text-slate-900 truncate block">{app.parents_name || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Parent Phone</span>
+                      <span className="text-[11px] font-bold text-slate-700">{app.parent_phone || '—'}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Institution</span>
+                      <span className="text-[11px] font-bold text-slate-700 truncate block">{app.school || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Grad Year</span>
+                      <span className="text-[11px] font-bold text-slate-700">{app.passed_out_year || '—'}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Address</span>
+                      <span className="text-[11px] font-medium text-slate-500 line-clamp-2 leading-relaxed">{app.address || '—'}</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between bg-slate-50 -mx-5 -mb-5 p-3 px-5 border-t border-slate-100">
+                    <div className="flex gap-2">
+                      <MiniDocLink href={app.community_certificate_url} label="C" />
+                      <MiniDocLink href={app.income_certificate_url} label="I" />
+                      <MiniDocLink href={app.bonofide_url} label="B" />
+                    </div>
+                    <span className="text-[9px] font-black text-slate-400">REF: {app.id.slice(0, 8)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {editingApp && (
