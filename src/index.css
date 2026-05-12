@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+body {
+  @apply bg-neutral-950 text-neutral-100 antialiased selection:bg-purple-500/30;
+  font-family: var(--font-sans);
+}
