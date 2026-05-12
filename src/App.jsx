@@ -460,7 +460,7 @@ const PublicForm = () => {
                   <div className="relative flex-1">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input 
-                      name="phone" type="tel" placeholder="7639529193" required 
+                      name="phone" type="tel" placeholder="9876543210" required 
                       value={formData.phone} onChange={handleInputChange}
                       disabled={isOtpVerified}
                       className={`w-full bg-white border ${errors.phone ? 'border-red-500' : 'border-slate-200'} rounded-xl py-3 pl-12 pr-5 text-slate-900 focus:outline-none focus:border-red-500 transition-all ${isOtpVerified ? 'bg-emerald-50 border-emerald-200' : ''}`}
@@ -526,7 +526,7 @@ const PublicForm = () => {
 
             <FormSection title="Parent Details" icon={User}>
               <InputField label="Parent/Guardian Name" name="parents_name" placeholder="Full Name" icon={User} required value={formData.parents_name} onChange={handleInputChange} error={errors.parents_name} />
-              <InputField label="Parent Mobile Number" name="parent_phone" placeholder="10-digit number" icon={Phone} required value={formData.parent_phone} onChange={handleInputChange} error={errors.parent_phone} />
+              <InputField label="Parent Mobile Number" name="parent_phone" placeholder="9876543210" icon={Phone} required value={formData.parent_phone} onChange={handleInputChange} error={errors.parent_phone} />
               <div className="md:col-span-2">
                 <InputField label="Permanent Address" name="address" placeholder="Full Residential Address" icon={MapPin} required value={formData.address} onChange={handleInputChange} error={errors.address} />
               </div>
