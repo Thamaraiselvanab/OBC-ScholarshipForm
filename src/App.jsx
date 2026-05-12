@@ -264,22 +264,26 @@ const PublicForm = () => {
     setIsSendingOtp(true);
     
     try {
-      const { data: existing, error: checkError } = await supabase
-        .from('applications')
-        .select('phone, email')
-        .or(`phone.eq.${cleanPhone},email.eq.${cleanEmail}`);
+      // Use the secure RPC function to check for duplicates bypassing RLS
+      const { data: duplicateCheck, error: rpcError } = await supabase.rpc('check_duplicates', {
+        p_phone: cleanPhone,
+        p_email: cleanEmail
+      });
 
-      if (checkError) throw checkError;
-
-      if (existing && existing.length > 0) {
-        const newErrors = {};
-        existing.forEach(record => {
-          if (record.phone === cleanPhone) newErrors.phone = 'This number is already registered';
-          if (record.email === cleanEmail) newErrors.email = 'This email is already registered';
-        });
-        setErrors(prev => ({ ...prev, ...newErrors }));
-        setIsSendingOtp(false);
-        return;
+      if (rpcError) {
+        console.error('Duplicate Check Error:', rpcError);
+        // Fallback or ignore if RPC fails
+      } else if (duplicateCheck) {
+        if (duplicateCheck.phone_exists) {
+          setErrors(prev => ({ ...prev, phone: 'This mobile number is already registered' }));
+          setIsSendingOtp(false);
+          return;
+        }
+        if (duplicateCheck.email_exists) {
+          setErrors(prev => ({ ...prev, email: 'This email is already registered' }));
+          setIsSendingOtp(false);
+          return;
+        }
       }
 
       const { error } = await supabase.functions.invoke('send-whatsapp-otp', {
