@@ -197,6 +197,7 @@ const CustomDatePicker = ({ label, value, onChange, error }) => {
 // --- PAGES ---
 
 const PublicForm = () => {
+  const [formData, setFormData] = useState({
     name: '', email: '', phone: '', dob: '', 
     parents_name: '', parent_phone: '', address: '', 
     school: '', school_address: '', passed_out_year: ''
