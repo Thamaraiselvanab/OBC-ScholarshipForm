@@ -544,7 +544,7 @@ const PublicForm = () => {
                 value={formData.passed_out_year} 
                 onChange={handleInputChange} 
                 error={errors.passed_out_year}
-                options={Array.from({ length: 11 }, (_, i) => (2020 + i).toString())}
+                options={Array.from({ length: new Date().getFullYear() - 2020 + 1 }, (_, i) => (2020 + i).toString())}
               />
             </FormSection>
 
@@ -876,7 +876,7 @@ const EditModal = ({ app, onClose, onSave }) => {
                 onChange={handleInputChange} 
                 icon={Calendar} 
                 error={errors.passed_out_year}
-                options={Array.from({ length: 11 }, (_, i) => (2020 + i).toString())}
+                options={Array.from({ length: new Date().getFullYear() - 2020 + 1 }, (_, i) => (2020 + i).toString())}
               />
               <div className="md:col-span-2">
                 <InputField label="Permanent Address" name="address" value={formData.address || ''} onChange={handleInputChange} icon={MapPin} error={errors.address} />
