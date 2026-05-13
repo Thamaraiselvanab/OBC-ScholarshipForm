@@ -53,7 +53,7 @@ const InputField = ({ label, name, icon: Icon, error, ...props }) => (
   </div>
 );
 
-const SelectField = ({ label, name, icon: Icon, options, error, ...props }) => (
+const SelectField = ({ label, name, icon: Icon, options, error, placeholder = "Select...", ...props }) => (
   <div className="space-y-2">
     <label className="text-sm font-bold text-slate-700 ml-1">{label}</label>
     <div className="relative">
@@ -63,7 +63,7 @@ const SelectField = ({ label, name, icon: Icon, options, error, ...props }) => (
         className={`w-full bg-white border ${error ? 'border-red-500' : 'border-slate-200'} rounded-xl py-3 ${Icon ? 'pl-12' : 'px-4'} pr-10 text-slate-900 focus:outline-none focus:border-red-500 transition-all appearance-none cursor-pointer`}
         {...props}
       >
-        <option value="">Select Year</option>
+        <option value="">{placeholder}</option>
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -198,10 +198,12 @@ const CustomDatePicker = ({ label, value, onChange, error }) => {
 
 const PublicForm = () => {
   const [formData, setFormData] = useState({
-    school: '', school_address: '', passed_out_year: '', marks_percentage: ''
+    school: '', school_address: '', passed_out_year: '', marks_percentage: '',
+    college_name: '', college_address: '', field_of_study: '', field_of_study_other: '', college_course: '',
+    college_start_year: '', college_end_year: ''
   });
 
-  const [files, setFiles] = useState({ communityCertificate: null, incomeCertificate: null, bonofide: null });
+  const [files, setFiles] = useState({ communityCertificate: null, incomeCertificate: null, bonofide: null, marksheet12th: null });
   const [errors, setErrors] = useState({});
   const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -235,17 +237,63 @@ const PublicForm = () => {
       const digits = value.replace(/\D/g, '');
       if (digits.length !== 10) return 'Must be exactly 10 digits';
     }
+    if (name === 'marks_percentage') {
+      const num = parseFloat(value);
+      if (isNaN(num) || num < 1 || num > 100) return 'Invalid (1-100)';
+    }
+    if (name === 'field_of_study') {
+      if (!value) return 'Required';
+    }
+    if (name === 'field_of_study_other') {
+      if (!value) return 'Required';
+    }
+    if (name === 'college_end_year' && formData.college_start_year) {
+      if (parseInt(value) < parseInt(formData.college_start_year)) return 'Cannot be before start';
+    }
+    if (name === 'college_start_year' && formData.college_end_year) {
+      if (parseInt(value) > parseInt(formData.college_end_year)) return 'Cannot be after end';
+    }
     return null;
   };
 
   const handleInputChange = (e) => {
     let { name, value } = e.target;
     if (name === 'phone' || name === 'parent_phone') value = value.replace(/\D/g, '').slice(0, 10);
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
+    if (name === 'marks_percentage' && value !== '') {
+      const num = parseFloat(value);
+      if (num > 100) value = '100';
+      if (num < 0) value = '0';
+    }
+    const newFormData = { ...formData, [name]: value };
+    setFormData(newFormData);
+
+    // Instant validation for years using the new state to avoid stale data
+    if (name === 'college_start_year' || name === 'college_end_year') {
+      const startVal = parseInt(newFormData.college_start_year);
+      const endVal = parseInt(newFormData.college_end_year);
+      
+      let startErr = null;
+      let endErr = null;
+      
+      if (startVal && endVal) {
+        if (startVal > endVal) startErr = 'Cannot be after end';
+        if (endVal < startVal) endErr = 'Cannot be before start';
+      } else if (!newFormData.college_start_year) {
+        startErr = 'Required';
+      } else if (!newFormData.college_end_year) {
+        endErr = 'Required';
+      }
+
+      setErrors(prev => ({ 
+        ...prev, 
+        college_start_year: startErr,
+        college_end_year: endErr
+      }));
+    } else if (errors[name]) {
       const error = validateField(name, value);
       setErrors(prev => ({ ...prev, [name]: error }));
     }
+    
     if (name === 'phone') {
       setOtpSent(false);
       setIsOtpVerified(false);
@@ -348,11 +396,20 @@ const PublicForm = () => {
     e.preventDefault();
     const newErrors = {};
     // Check form fields
-    const fieldsToValidate = ['name', 'email', 'phone', 'dob', 'parents_name', 'parent_phone', 'address', 'school', 'school_address', 'passed_out_year', 'marks_percentage'];
+    const fieldsToValidate = [
+      'name', 'email', 'phone', 'dob', 'parents_name', 'parent_phone', 'address', 
+      'school', 'school_address', 'passed_out_year', 'marks_percentage',
+      'college_name', 'college_address', 'field_of_study', 'college_course',
+      'college_start_year', 'college_end_year'
+    ];
     fieldsToValidate.forEach(key => {
       const error = validateField(key, formData[key]);
       if (error) newErrors[key] = error;
     });
+
+    if (formData.field_of_study === 'Others' && !formData.field_of_study_other?.trim()) {
+      newErrors.field_of_study_other = 'Required';
+    }
 
     // Check files
     Object.keys(files).forEach(key => { if (!files[key]) newErrors[key] = 'Required'; });
@@ -369,6 +426,13 @@ const PublicForm = () => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       
+      // Auto-scroll to the first error
+      const firstErrorField = Object.keys(newErrors)[0];
+      const errorElement = document.getElementsByName(firstErrorField)[0] || document.querySelector(`[name="${firstErrorField}"]`);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
       // Determine specific message for the main error box
       let mainErrorMessage = 'Please fix the highlighted errors above';
       if (Object.keys(newErrors).length === 1 && !isOtpVerified) {
@@ -393,19 +457,24 @@ const PublicForm = () => {
         throw new Error('Please fix the duplicate email address');
       }
 
-      const [cUrl, iUrl, bUrl] = await Promise.all([
+      const [cUrl, iUrl, bUrl, mUrl] = await Promise.all([
         uploadFile(files.communityCertificate, 'data', 'community'),
         uploadFile(files.incomeCertificate, 'data', 'income'),
-        uploadFile(files.bonofide, 'data', 'bonofide')
+        uploadFile(files.bonofide, 'data', 'bonofide'),
+        uploadFile(files.marksheet12th, 'data', 'marksheet12th')
       ]);
 
-      const { dob_day, dob_month, dob_year, ...dataToSubmit } = formData;
+      const finalFieldOfStudy = formData.field_of_study === 'Others' ? formData.field_of_study_other : formData.field_of_study;
+
+      const { dob_day, dob_month, dob_year, field_of_study_other, ...dataToSubmit } = formData;
 
       const { error } = await supabase.from('applications').insert([{
         ...dataToSubmit,
+        field_of_study: finalFieldOfStudy,
         community_certificate_url: cUrl,
         income_certificate_url: iUrl,
-        bonofide_url: bUrl
+        bonofide_url: bUrl,
+        marksheet_12th_url: mUrl
       }]);
       
       if (error) throw error;
@@ -541,21 +610,55 @@ const PublicForm = () => {
                 value={formData.passed_out_year} 
                 onChange={handleInputChange} 
                 error={errors.passed_out_year}
+                placeholder="Select Year"
                 options={Array.from({ length: new Date().getFullYear() - 2020 + 1 }, (_, i) => (2020 + i).toString())}
               />
-              <InputField label="Marks(Percentage)" name="marks_percentage" placeholder="e.g. 85%" icon={FileText} required value={formData.marks_percentage} onChange={handleInputChange} error={errors.marks_percentage} />
+              <InputField label="Marks(Percentage)" name="marks_percentage" type="number" min="1" max="100" placeholder="e.g. 85" icon={FileText} required value={formData.marks_percentage} onChange={handleInputChange} error={errors.marks_percentage} />
+            </FormSection>
+            
+            <FormSection title="College Details" icon={GraduationCap}>
+              <InputField label="College Name" name="college_name" placeholder="Full College Name" icon={GraduationCap} required value={formData.college_name} onChange={handleInputChange} error={errors.college_name} />
+              <InputField label="College Address" name="college_address" placeholder="City/Location" icon={MapPin} required value={formData.college_address} onChange={handleInputChange} error={errors.college_address} />
+              <SelectField 
+                label="Field of Study" name="field_of_study" icon={Filter} required 
+                value={formData.field_of_study} onChange={handleInputChange} error={errors.field_of_study}
+                placeholder="Select any one"
+                options={['Arts', 'Engineering', 'Medical', 'Others']}
+              />
+              {formData.field_of_study === 'Others' && (
+                <InputField 
+                  label="Please specify Field of Study" name="field_of_study_other" 
+                  placeholder="Enter your field of study" icon={Edit} required 
+                  value={formData.field_of_study_other} onChange={handleInputChange} 
+                  error={errors.field_of_study_other} 
+                />
+              )}
+              <InputField label="Course" name="college_course" placeholder="e.g. B.E Computer Science" icon={FileText} required value={formData.college_course} onChange={handleInputChange} error={errors.college_course} />
+              <SelectField 
+                label="Start Year" name="college_start_year" icon={Calendar} required 
+                value={formData.college_start_year} onChange={handleInputChange} error={errors.college_start_year}
+                placeholder="Select Year"
+                options={Array.from({ length: 6 }, (_, i) => (new Date().getFullYear() + i).toString())}
+              />
+              <SelectField 
+                label="End Year" name="college_end_year" icon={Calendar} required 
+                value={formData.college_end_year} onChange={handleInputChange} error={errors.college_end_year}
+                placeholder="Select Year"
+                options={Array.from({ length: 6 }, (_, i) => (new Date().getFullYear() + i).toString())}
+              />
             </FormSection>
 
             <FormSection title="Required Documents" icon={FileText}>
               <div className="space-y-4 md:col-span-2">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[
                     { label: 'Community Certificate', field: 'communityCertificate' },
                     { label: 'Income Certificate', field: 'incomeCertificate' },
-                    { label: 'Bonafide Certificate', field: 'bonofide' }
+                    { label: 'Bonafide Certificate', field: 'bonofide' },
+                    { label: '12th Marksheet', field: 'marksheet12th' }
                   ].map((doc) => (
                     <div key={doc.field} className="relative group">
-                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">{doc.label}</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-tight mb-2 block ml-1 whitespace-nowrap">{doc.label}</label>
                       <div className={`relative h-32 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center p-4 text-center cursor-pointer ${files[doc.field] ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 hover:border-red-400 hover:bg-red-50'}`}>
                         <input type="file" accept="image/*,.pdf" onChange={(e) => handleFileChange(e, doc.field)} className="absolute inset-0 opacity-0 cursor-pointer" />
                         {files[doc.field] ? (
@@ -598,7 +701,7 @@ const PublicForm = () => {
 
                   <div>
                     <p className="font-bold mb-2">3. How to apply:</p>
-                    <p className="mb-2">You should apply by filling the following columns in our website <a href="https://www.obcrights.org" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:underline">www.obcrights.org</a> and submit:</p>
+                    <p className="mb-2">You should apply by filling the following columns in our website <a href="https://www.obcrights.org" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:underline font-bold">www.obcrights.org</a> and submit:</p>
                     <ul className="space-y-1 pl-4 border-l-2 border-slate-200 mb-4">
                       <li>a. Full Name:</li>
                       <li>b. Full Address:</li>
@@ -611,24 +714,11 @@ const PublicForm = () => {
                       <li>b. BC / MBC Certificate</li>
                       <li>c. Income Affidavit</li>
                     </ul>
-                    <div className="bg-white p-5 rounded-xl border border-slate-200 italic text-slate-700 shadow-sm">
-                      <p className="mb-3 font-bold not-italic text-slate-900">Fill the following income affidavit:</p>
-                      <p className="mb-6">“We ………… (student name) and ……… (Father’s name) hereby solemnly affirm and sincerely state that our income per year is Rs. ………. (………… only in words)”.</p>
-                      <div className="flex flex-col sm:flex-row justify-between gap-4 text-[10px] font-black uppercase tracking-widest opacity-40">
-                        <div className="flex flex-col items-center">
-                          <div className="h-px w-24 bg-slate-300 mb-1"></div>
-                          <span>Signature of the Parent</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                          <div className="h-px w-24 bg-slate-300 mb-1"></div>
-                          <span>Signature of the Student</span>
-                        </div>
-                      </div>
-                    </div>
+                    <p className="font-bold">Fill the following income affidavit:</p>
                   </div>
 
                   <p>
-                    <span className="font-bold">4.</span> Those who wish to send the aforesaid details by individual mail or by hard copies (in paper), may kindly send it to the following, mail id and address before 30.05.2026 evening.
+                    <span className="font-bold">4.</span> Those who wish to send the abovesaid details by individual mail or by hard copies (in paper), may kindly send it to the following, mail id and address before 30.05.2026 evening.
                   </p>
 
                   <div className="p-4 bg-white rounded-xl border border-slate-100 shadow-sm space-y-1">
@@ -719,11 +809,19 @@ const AdminLogin = () => {
 };
 
 const EditModal = ({ app, onClose, onSave }) => {
-  const [formData, setFormData] = useState({ ...app });
+  const initialFieldOfStudy = ['Arts', 'Engineering', 'Medical'].includes(app.field_of_study) ? app.field_of_study : 'Others';
+  const initialFieldOfStudyOther = initialFieldOfStudy === 'Others' ? app.field_of_study : '';
+
+  const [formData, setFormData] = useState({ 
+    ...app, 
+    field_of_study: initialFieldOfStudy,
+    field_of_study_other: initialFieldOfStudyOther
+  });
   const [newFiles, setNewFiles] = useState({ 
     community: null, 
     income: null, 
-    bonofide: null 
+    bonofide: null,
+    marksheet12th: null 
   });
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
@@ -733,8 +831,22 @@ const EditModal = ({ app, onClose, onSave }) => {
     if (name === 'phone' || name === 'parent_phone') {
       value = value.replace(/\D/g, '').slice(0, 10);
     }
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+    if (name === 'marks_percentage' && value !== '') {
+      const num = parseFloat(value);
+      if (num > 100) value = '100';
+      if (num < 0) value = '0';
+    }
+    const newFormData = { ...formData, [name]: value };
+    setFormData(newFormData);
+
+    if (name === 'college_start_year' || name === 'college_end_year') {
+      const { college_start_year, college_end_year } = newFormData;
+      const startErr = college_start_year && college_end_year && parseInt(college_start_year) > parseInt(college_end_year) ? 'Cannot be after end' : null;
+      const endErr = college_start_year && college_end_year && parseInt(college_end_year) < parseInt(college_start_year) ? 'Cannot be before start' : null;
+      setErrors(prev => ({ ...prev, college_start_year: startErr, college_end_year: endErr }));
+    } else if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
   };
 
   const handleFileChange = (e, field) => {
@@ -768,7 +880,25 @@ const EditModal = ({ app, onClose, onSave }) => {
     if (!formData.school_address?.trim()) newErrors.school_address = 'Required';
     if (!formData.passed_out_year?.trim()) newErrors.passed_out_year = 'Required';
     if (!formData.address?.trim()) newErrors.address = 'Required';
-    if (!formData.marks_percentage?.trim()) newErrors.marks_percentage = 'Required';
+    if (!formData.marks_percentage) newErrors.marks_percentage = 'Required';
+    if (!formData.college_name?.trim()) newErrors.college_name = 'Required';
+    if (!formData.college_address?.trim()) newErrors.college_address = 'Required';
+    if (!formData.field_of_study?.trim()) newErrors.field_of_study = 'Required';
+    if (!formData.college_course?.trim()) newErrors.college_course = 'Required';
+    if (!formData.college_start_year?.trim()) newErrors.college_start_year = 'Required';
+    if (!formData.college_end_year?.trim()) newErrors.college_end_year = 'Required';
+    if (formData.field_of_study === 'Others' && !formData.field_of_study_other?.trim()) newErrors.field_of_study_other = 'Required';
+    
+    if (formData.marks_percentage) {
+      const mNum = parseFloat(formData.marks_percentage);
+      if (isNaN(mNum) || mNum < 1 || mNum > 100) newErrors.marks_percentage = 'Must be 1-100';
+    }
+
+    if (formData.college_start_year && formData.college_end_year) {
+      if (parseInt(formData.college_end_year) < parseInt(formData.college_start_year)) {
+        newErrors.college_end_year = 'Cannot be before start';
+      }
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -803,22 +933,43 @@ const EditModal = ({ app, onClose, onSave }) => {
     return publicUrl;
   };
 
+  const deleteOldFile = async (url) => {
+    if (!url) return;
+    try {
+      const path = url.split('/').pop();
+      await supabase.storage.from('data').remove([`applications/${path}`]);
+    } catch (e) { console.error("Error deleting old file:", e); }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (await validate()) {
       setIsSaving(true);
       try {
-        let finalData = { ...formData };
+        const finalFieldOfStudy = formData.field_of_study === 'Others' ? formData.field_of_study_other : formData.field_of_study;
+        let finalData = { ...formData, field_of_study: finalFieldOfStudy };
+        delete finalData.field_of_study_other;
         
-        // Upload new certificates if selected
+        // Upload new certificates if selected and cleanup old ones
         if (newFiles.community) {
+          const oldUrl = app.community_certificate_url;
           finalData.community_certificate_url = await uploadFile(newFiles.community, 'data', 'community');
+          if (oldUrl) await deleteOldFile(oldUrl);
         }
         if (newFiles.income) {
+          const oldUrl = app.income_certificate_url;
           finalData.income_certificate_url = await uploadFile(newFiles.income, 'data', 'income');
+          if (oldUrl) await deleteOldFile(oldUrl);
         }
         if (newFiles.bonofide) {
+          const oldUrl = app.bonofide_url;
           finalData.bonofide_url = await uploadFile(newFiles.bonofide, 'data', 'bonofide');
+          if (oldUrl) await deleteOldFile(oldUrl);
+        }
+        if (newFiles.marksheet12th) {
+          const oldUrl = app.marksheet_12th_url;
+          finalData.marksheet_12th_url = await uploadFile(newFiles.marksheet12th, 'data', 'marksheet12th');
+          if (oldUrl) await deleteOldFile(oldUrl);
         }
 
         await onSave(app.id, finalData);
@@ -875,9 +1026,39 @@ const EditModal = ({ app, onClose, onSave }) => {
                 onChange={handleInputChange} 
                 icon={Calendar} 
                 error={errors.passed_out_year}
+                placeholder="Select Year"
                 options={Array.from({ length: new Date().getFullYear() - 2020 + 1 }, (_, i) => (2020 + i).toString())}
               />
-              <InputField label="Marks(Percentage)" name="marks_percentage" value={formData.marks_percentage || ''} onChange={handleInputChange} icon={FileText} error={errors.marks_percentage} />
+              <InputField label="Marks(Percentage)" name="marks_percentage" type="number" min="1" max="100" value={formData.marks_percentage || ''} onChange={handleInputChange} icon={FileText} error={errors.marks_percentage} />
+              
+              <div className="md:col-span-2 pt-4 border-t border-slate-100 mt-2">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">College Details</h4>
+              </div>
+              <InputField label="College Name" name="college_name" value={formData.college_name || ''} onChange={handleInputChange} icon={GraduationCap} error={errors.college_name} />
+              <InputField label="College Address" name="college_address" value={formData.college_address || ''} onChange={handleInputChange} icon={MapPin} error={errors.college_address} />
+              <SelectField 
+                label="Field of Study" name="field_of_study" value={formData.field_of_study || ''} onChange={handleInputChange} icon={Filter} error={errors.field_of_study}
+                placeholder="Select any one"
+                options={['Arts', 'Engineering', 'Medical', 'Others']}
+              />
+              {formData.field_of_study === 'Others' && (
+                <InputField 
+                  label="Other Field of Study" name="field_of_study_other" 
+                  value={formData.field_of_study_other || ''} onChange={handleInputChange} 
+                  icon={Edit} error={errors.field_of_study_other} 
+                />
+              )}
+              <InputField label="Course" name="college_course" value={formData.college_course || ''} onChange={handleInputChange} icon={FileText} error={errors.college_course} />
+              <SelectField 
+                label="Start Year" name="college_start_year" value={formData.college_start_year || ''} onChange={handleInputChange} icon={Calendar} error={errors.college_start_year}
+                placeholder="Select Year"
+                options={Array.from({ length: 6 }, (_, i) => (new Date().getFullYear() + i).toString())}
+              />
+              <SelectField 
+                label="End Year" name="college_end_year" value={formData.college_end_year || ''} onChange={handleInputChange} icon={Calendar} error={errors.college_end_year}
+                placeholder="Select Year"
+                options={Array.from({ length: 6 }, (_, i) => (new Date().getFullYear() + i).toString())}
+              />
               <div className="md:col-span-2">
                 <InputField label="Permanent Address" name="address" value={formData.address || ''} onChange={handleInputChange} icon={MapPin} error={errors.address} />
               </div>
@@ -885,11 +1066,12 @@ const EditModal = ({ app, onClose, onSave }) => {
 
             <div className="pt-6 border-t border-slate-100">
               <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-4">Update Certificates</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   { label: 'Community', field: 'community', url: formData.community_certificate_url },
                   { label: 'Income', field: 'income', url: formData.income_certificate_url },
-                  { label: 'Bonafide', field: 'bonofide', url: formData.bonofide_url }
+                  { label: 'Bonafide', field: 'bonofide', url: formData.bonofide_url },
+                  { label: '12th Marksheet', field: 'marksheet12th', url: formData.marksheet_12th_url }
                 ].map((doc) => (
                   <div key={doc.field} className="relative">
                     <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">{doc.label}</label>
@@ -976,9 +1158,16 @@ const AdminDashboard = () => {
         school_address: updatedData.school_address,
         passed_out_year: updatedData.passed_out_year,
         marks_percentage: updatedData.marks_percentage,
+        college_name: updatedData.college_name,
+        college_address: updatedData.college_address,
+        field_of_study: updatedData.field_of_study,
+        college_course: updatedData.college_course,
+        college_start_year: updatedData.college_start_year,
+        college_end_year: updatedData.college_end_year,
         community_certificate_url: updatedData.community_certificate_url,
         income_certificate_url: updatedData.income_certificate_url,
-        bonofide_url: updatedData.bonofide_url
+        bonofide_url: updatedData.bonofide_url,
+        marksheet_12th_url: updatedData.marksheet_12th_url
       };
       
       console.log('Attempting explicit update for ID:', id, cleanData);
@@ -1017,7 +1206,7 @@ const AdminDashboard = () => {
     }
     
     // Define headers
-    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "Institution Name", "Institution Address", "Passing Year", "Marks %", "Address", "Community Cert URL", "Income Cert URL", "Bonafide Cert URL", "Applied At"];
+    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "Institution Name", "Institution Address", "Passing Year", "Marks %", "College Name", "College Address", "Field of Study", "Course", "Start", "End", "Address", "Community Cert URL", "Income Cert URL", "Bonafide Cert URL", "12th Marksheet URL", "Applied At"];
     
     // Map data to rows
     const rows = applications.map(app => [
@@ -1031,10 +1220,17 @@ const AdminDashboard = () => {
       `"${(app.school_address || '').replace(/"/g, '""')}"`,
       `"${app.passed_out_year || ''}"`,
       `"${app.marks_percentage || ''}"`,
+      `"${(app.college_name || '').replace(/"/g, '""')}"`,
+      `"${(app.college_address || '').replace(/"/g, '""')}"`,
+      `"${app.field_of_study || ''}"`,
+      `"${(app.college_course || '').replace(/"/g, '""')}"`,
+      `"${app.college_start_year || ''}"`,
+      `"${app.college_end_year || ''}"`,
       `"${(app.address || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
       `"${app.community_certificate_url || ''}"`,
       `"${app.income_certificate_url || ''}"`,
       `"${app.bonofide_url || ''}"`,
+      `"${app.marksheet_12th_url || ''}"`,
       `"${app.created_at || ''}"`
     ]);
 
@@ -1108,7 +1304,7 @@ const AdminDashboard = () => {
             {/* Desktop Table View */}
             <div className="hidden lg:block bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
               <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left border-collapse min-w-[1600px]">
+                <table className="w-full text-left border-collapse min-w-[2800px]">
                   <thead>
                     <tr className="bg-slate-900 text-white">
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Student Name</th>
@@ -1121,6 +1317,12 @@ const AdminDashboard = () => {
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Institution Address</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Year of Passing</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Marks %</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">College</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">College Address</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Field of Study</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Course</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Start</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">End</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Address</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Docs</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest">Actions</th>
@@ -1139,12 +1341,19 @@ const AdminDashboard = () => {
                         <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.school_address || '—'}</td>
                         <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.passed_out_year || '—'}</td>
                         <td className="px-4 py-4 text-xs font-bold text-red-600 border-r border-slate-100">{app.marks_percentage || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.college_name || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.college_address || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.field_of_study || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.college_course || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.college_start_year || '—'}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.college_end_year || '—'}</td>
                         <td className="px-4 py-4 text-[10px] font-medium text-slate-500 border-r border-slate-100 max-w-[300px] truncate" title={app.address}>{app.address || '—'}</td>
                         <td className="px-4 py-4">
                           <div className="flex gap-2">
                             <MiniDocLink href={app.community_certificate_url} label="C" />
                             <MiniDocLink href={app.income_certificate_url} label="I" />
                             <MiniDocLink href={app.bonofide_url} label="B" />
+                            <MiniDocLink href={app.marksheet_12th_url} label="M" />
                           </div>
                         </td>
                         <td className="px-4 py-4">
@@ -1196,6 +1405,30 @@ const AdminDashboard = () => {
                       <span className="text-[11px] font-bold text-slate-700 truncate block">{app.school || '—'}</span>
                     </div>
                     <div className="col-span-2">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">College Name</span>
+                      <span className="text-[11px] font-bold text-slate-700 truncate block">{app.college_name || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Field of Study</span>
+                      <span className="text-[11px] font-bold text-slate-700 truncate block">{app.field_of_study || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Course</span>
+                      <span className="text-[11px] font-bold text-slate-700 truncate block">{app.college_course || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Start Year</span>
+                      <span className="text-[11px] font-bold text-slate-700">{app.college_start_year || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">End Year</span>
+                      <span className="text-[11px] font-bold text-slate-700">{app.college_end_year || '—'}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">College Address</span>
+                      <span className="text-[11px] font-medium text-slate-500 truncate block">{app.college_address || '—'}</span>
+                    </div>
+                    <div className="col-span-2">
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Institution Address</span>
                       <span className="text-[11px] font-medium text-slate-500 truncate block">{app.school_address || '—'}</span>
                     </div>
@@ -1217,6 +1450,7 @@ const AdminDashboard = () => {
                       <MiniDocLink href={app.community_certificate_url} label="C" />
                       <MiniDocLink href={app.income_certificate_url} label="I" />
                       <MiniDocLink href={app.bonofide_url} label="B" />
+                      <MiniDocLink href={app.marksheet_12th_url} label="M" />
                     </div>
                     <span className="text-[9px] font-black text-slate-400">REF: {app.id.slice(0, 8)}</span>
                   </div>
