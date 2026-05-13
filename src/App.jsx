@@ -1400,13 +1400,33 @@ const AdminDashboard = () => {
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Parent Phone</span>
                       <span className="text-[11px] font-bold text-slate-700">{app.parent_phone || '—'}</span>
                     </div>
-                    <div className="col-span-2">
+
+                    {/* School Details */}
+                    <div className="col-span-2 border-t border-slate-50 pt-2 mt-1">
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">School Name</span>
                       <span className="text-[11px] font-bold text-slate-700 truncate block">{app.school || '—'}</span>
                     </div>
                     <div className="col-span-2">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">School Address</span>
+                      <span className="text-[11px] font-medium text-slate-500 truncate block">{app.school_address || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Grad Year</span>
+                      <span className="text-[11px] font-bold text-slate-700">{app.passed_out_year || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Marks %</span>
+                      <span className="text-[11px] font-bold text-red-600">{app.marks_percentage || '—'}</span>
+                    </div>
+
+                    {/* College Details */}
+                    <div className="col-span-2 border-t border-slate-50 pt-2 mt-1">
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">College Name</span>
                       <span className="text-[11px] font-bold text-slate-700 truncate block">{app.college_name || '—'}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">College Address</span>
+                      <span className="text-[11px] font-medium text-slate-500 truncate block">{app.college_address || '—'}</span>
                     </div>
                     <div>
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Field of Study</span>
@@ -1424,24 +1444,9 @@ const AdminDashboard = () => {
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">End Year</span>
                       <span className="text-[11px] font-bold text-slate-700">{app.college_end_year || '—'}</span>
                     </div>
-                    <div className="col-span-2">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">College Address</span>
-                      <span className="text-[11px] font-medium text-slate-500 truncate block">{app.college_address || '—'}</span>
-                    </div>
-                    <div className="col-span-2">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Institution Address</span>
-                      <span className="text-[11px] font-medium text-slate-500 truncate block">{app.school_address || '—'}</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Marks %</span>
-                      <span className="text-[11px] font-bold text-red-600">{app.marks_percentage || '—'}</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Grad Year</span>
-                      <span className="text-[11px] font-bold text-slate-700">{app.passed_out_year || '—'}</span>
-                    </div>
-                    <div className="col-span-2">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Address</span>
+
+                    <div className="col-span-2 border-t border-slate-50 pt-2 mt-1">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Permanent Address</span>
                       <span className="text-[11px] font-medium text-slate-500 line-clamp-2 leading-relaxed">{app.address || '—'}</span>
                     </div>
                   </div>
