@@ -654,7 +654,7 @@ const PublicForm = () => {
                   {[
                     { label: 'Community Certificate', field: 'communityCertificate' },
                     { label: 'Income Certificate', field: 'incomeCertificate' },
-                    { label: 'Bonafide Certificate', field: 'bonofide' },
+                    { label: 'Bonafide Certificate (College)', field: 'bonofide' },
                     { label: '12th Marksheet', field: 'marksheet12th' }
                   ].map((doc) => (
                     <div key={doc.field} className="relative group">
@@ -1070,7 +1070,7 @@ const EditModal = ({ app, onClose, onSave }) => {
                 {[
                   { label: 'Community', field: 'community', url: formData.community_certificate_url },
                   { label: 'Income', field: 'income', url: formData.income_certificate_url },
-                  { label: 'Bonafide', field: 'bonofide', url: formData.bonofide_url },
+                  { label: 'Bonafide (College)', field: 'bonofide', url: formData.bonofide_url },
                   { label: '12th Marksheet', field: 'marksheet12th', url: formData.marksheet_12th_url }
                 ].map((doc) => (
                   <div key={doc.field} className="relative">
@@ -1206,7 +1206,7 @@ const AdminDashboard = () => {
     }
     
     // Define headers
-    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "School Name", "School Address", "Passing Year", "Marks %", "College Name", "College Address", "Field of Study", "Course", "Start Year", "End Year", "Address", "Community Cert URL", "Income Cert URL", "Bonafide Cert URL", "12th Marksheet URL", "Applied At"];
+    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "School Name", "School Address", "Passing Year", "Marks %", "College Name", "College Address", "Field of Study", "Course", "Start Year", "End Year", "Address", "Community Cert URL", "Income Cert URL", "Bonafide (College) URL", "12th Marksheet URL", "Applied At"];
     
     // Map data to rows
     const rows = applications.map(app => [
