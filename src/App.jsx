@@ -451,7 +451,7 @@ const PublicForm = () => {
         <div className="bg-white rounded-[2rem] shadow-xl p-8 md:p-12">
           <form onSubmit={handleSubmit}>
             <FormSection title="Student Identity" icon={User}>
-              <InputField label="Full Name" name="name" placeholder="As per certificate" icon={User} required value={formData.name} onChange={handleInputChange} error={errors.name} />
+              <InputField label="Full Name" name="name" placeholder="As per SSLC certificate" icon={User} required value={formData.name} onChange={handleInputChange} error={errors.name} />
               <InputField label="Email Address" name="email" type="email" placeholder="student@example.com" icon={Mail} required value={formData.email} onChange={handleInputChange} error={errors.email} />
               
               <div className="space-y-2">
@@ -536,7 +536,7 @@ const PublicForm = () => {
               <InputField label="Institution Name" name="school" placeholder="School/College Name" icon={GraduationCap} required value={formData.school} onChange={handleInputChange} error={errors.school} />
               <InputField label="Institution Address" name="school_address" placeholder="City/Location" icon={MapPin} required value={formData.school_address} onChange={handleInputChange} error={errors.school_address} />
               <SelectField 
-                label="Year of Graduation" 
+                label="Year of Graduation - HSC(12th)" 
                 name="passed_out_year" 
                 icon={Calendar} 
                 required 
@@ -553,7 +553,7 @@ const PublicForm = () => {
                   {[
                     { label: 'Community Certificate', field: 'communityCertificate' },
                     { label: 'Income Certificate', field: 'incomeCertificate' },
-                    { label: 'Bonofide Certificate', field: 'bonofide' }
+                    { label: 'Bonafide Certificate', field: 'bonofide' }
                   ].map((doc) => (
                     <div key={doc.field} className="relative group">
                       <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">{doc.label}</label>
@@ -869,7 +869,7 @@ const EditModal = ({ app, onClose, onSave }) => {
               <InputField label="Institution Name" name="school" value={formData.school || ''} onChange={handleInputChange} icon={GraduationCap} error={errors.school} />
               <InputField label="Institution Address" name="school_address" value={formData.school_address || ''} onChange={handleInputChange} icon={MapPin} error={errors.school_address} />
               <SelectField 
-                label="Graduation Year" 
+                label="Graduation Year - HSC(12th)" 
                 name="passed_out_year" 
                 value={formData.passed_out_year || ''} 
                 onChange={handleInputChange} 
@@ -888,7 +888,7 @@ const EditModal = ({ app, onClose, onSave }) => {
                 {[
                   { label: 'Community', field: 'community', url: formData.community_certificate_url },
                   { label: 'Income', field: 'income', url: formData.income_certificate_url },
-                  { label: 'Bonofide', field: 'bonofide', url: formData.bonofide_url }
+                  { label: 'Bonafide', field: 'bonafide', url: formData.bonafide_url }
                 ].map((doc) => (
                   <div key={doc.field} className="relative">
                     <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">{doc.label}</label>
@@ -1015,7 +1015,7 @@ const AdminDashboard = () => {
     }
     
     // Define headers
-    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "Institution Name", "Institution Address", "Graduation Year", "Address", "Community Cert URL", "Income Cert URL", "Bonofide Cert URL", "Applied At"];
+    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "Institution Name", "Institution Address", "Graduation Year", "Address", "Community Cert URL", "Income Cert URL", "Bonafide Cert URL", "Applied At"];
     
     // Map data to rows
     const rows = applications.map(app => [
