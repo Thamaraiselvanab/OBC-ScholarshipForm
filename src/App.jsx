@@ -1206,7 +1206,7 @@ const AdminDashboard = () => {
     }
     
     // Define headers
-    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "School Name", "School Address", "Passing Year", "Marks %", "College Name", "College Address", "Field of Study", "Course", "Start", "End", "Address", "Community Cert URL", "Income Cert URL", "Bonafide Cert URL", "12th Marksheet URL", "Applied At"];
+    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "School Name", "School Address", "Passing Year", "Marks %", "College Name", "College Address", "Field of Study", "Course", "Start Year", "End Year", "Address", "Community Cert URL", "Income Cert URL", "Bonafide Cert URL", "12th Marksheet URL", "Applied At"];
     
     // Map data to rows
     const rows = applications.map(app => [
@@ -1321,8 +1321,8 @@ const AdminDashboard = () => {
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">College Address</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Field of Study</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Course</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Start</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">End</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Start Year</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">End Year</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Address</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Docs</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest">Actions</th>
