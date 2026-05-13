@@ -600,8 +600,8 @@ const PublicForm = () => {
             </FormSection>
 
             <FormSection title="School Details" icon={GraduationCap}>
-              <InputField label="Institution Name" name="school" placeholder="School Name" icon={GraduationCap} required value={formData.school} onChange={handleInputChange} error={errors.school} />
-              <InputField label="Institution Address" name="school_address" placeholder="City/Location" icon={MapPin} required value={formData.school_address} onChange={handleInputChange} error={errors.school_address} />
+              <InputField label="School Name" name="school" placeholder="School Name" icon={GraduationCap} required value={formData.school} onChange={handleInputChange} error={errors.school} />
+              <InputField label="School Address" name="school_address" placeholder="City/Location" icon={MapPin} required value={formData.school_address} onChange={handleInputChange} error={errors.school_address} />
               <SelectField 
                 label="Year of passing - HSC(12th)" 
                 name="passed_out_year" 
@@ -1017,8 +1017,8 @@ const EditModal = ({ app, onClose, onSave }) => {
               </div>
               <InputField label="Parent Name" name="parents_name" value={formData.parents_name || ''} onChange={handleInputChange} icon={User} error={errors.parents_name} />
               <InputField label="Parent Phone" name="parent_phone" value={formData.parent_phone || ''} onChange={handleInputChange} icon={Phone} error={errors.parent_phone} />
-              <InputField label="Institution Name" name="school" value={formData.school || ''} onChange={handleInputChange} icon={GraduationCap} error={errors.school} />
-              <InputField label="Institution Address" name="school_address" value={formData.school_address || ''} onChange={handleInputChange} icon={MapPin} error={errors.school_address} />
+              <InputField label="School Name" name="school" value={formData.school || ''} onChange={handleInputChange} icon={GraduationCap} error={errors.school} />
+              <InputField label="School Address" name="school_address" value={formData.school_address || ''} onChange={handleInputChange} icon={MapPin} error={errors.school_address} />
               <SelectField 
                 label="Year of passing - HSC(12th)" 
                 name="passed_out_year" 
@@ -1206,7 +1206,7 @@ const AdminDashboard = () => {
     }
     
     // Define headers
-    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "Institution Name", "Institution Address", "Passing Year", "Marks %", "College Name", "College Address", "Field of Study", "Course", "Start", "End", "Address", "Community Cert URL", "Income Cert URL", "Bonafide Cert URL", "12th Marksheet URL", "Applied At"];
+    const headers = ["Student Name", "Email Address", "Phone Number", "Date of Birth", "Parent Name", "Parent Phone", "School Name", "School Address", "Passing Year", "Marks %", "College Name", "College Address", "Field of Study", "Course", "Start", "End", "Address", "Community Cert URL", "Income Cert URL", "Bonafide Cert URL", "12th Marksheet URL", "Applied At"];
     
     // Map data to rows
     const rows = applications.map(app => [
@@ -1313,8 +1313,8 @@ const AdminDashboard = () => {
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">DOB</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Name</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Phone</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Institution Name</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Institution Address</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">School Name</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">School Address</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Year of Passing</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Marks %</th>
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">College</th>
@@ -1401,7 +1401,7 @@ const AdminDashboard = () => {
                       <span className="text-[11px] font-bold text-slate-700">{app.parent_phone || '—'}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Institution Name</span>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">School Name</span>
                       <span className="text-[11px] font-bold text-slate-700 truncate block">{app.school || '—'}</span>
                     </div>
                     <div className="col-span-2">
