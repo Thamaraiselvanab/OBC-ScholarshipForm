@@ -888,7 +888,7 @@ const EditModal = ({ app, onClose, onSave }) => {
                 {[
                   { label: 'Community', field: 'community', url: formData.community_certificate_url },
                   { label: 'Income', field: 'income', url: formData.income_certificate_url },
-                  { label: 'Bonafide', field: 'bonafide', url: formData.bonafide_url }
+                  { label: 'Bonafide', field: 'bonofide', url: formData.bonofide_url }
                 ].map((doc) => (
                   <div key={doc.field} className="relative">
                     <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">{doc.label}</label>
