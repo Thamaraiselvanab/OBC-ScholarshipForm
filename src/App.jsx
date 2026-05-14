@@ -306,6 +306,8 @@ const PublicForm = () => {
     const file = e.target.files[0];
     if (file && file.size > 1024 * 1024) {
       setErrors(prev => ({ ...prev, [field]: 'File exceeds 1MB' }));
+      if (typeof setFiles === 'function') setFiles(prev => ({ ...prev, [field]: null }));
+      if (typeof setNewFiles === 'function') setNewFiles(prev => ({ ...prev, [field]: null }));
       return;
     }
     setFiles(prev => ({ ...prev, [field]: file }));
@@ -412,7 +414,13 @@ const PublicForm = () => {
     }
 
     // Check files
-    Object.keys(files).forEach(key => { if (!files[key]) newErrors[key] = 'Required'; });
+    Object.keys(files).forEach(key => { 
+      if (errors[key] === 'File exceeds 1MB') {
+        newErrors[key] = 'File exceeds 1MB';
+      } else if (!files[key]) {
+        newErrors[key] = 'Required'; 
+      }
+    });
 
     if (!isOtpVerified) {
       newErrors.phone = 'Mobile number not verified';
@@ -673,7 +681,7 @@ const PublicForm = () => {
                           </>
                         )}
                       </div>
-                      {errors[doc.field] && <p className="text-[10px] text-red-600 font-bold mt-1.5 ml-1">{errors[doc.field]}</p>}
+                      {errors[doc.field] && <p className="text-[9px] bg-red-50 text-red-600 border border-red-100 rounded-lg px-2 py-1 font-black mt-2 text-center uppercase tracking-tighter shadow-sm">{errors[doc.field]}</p>}
                     </div>
                   ))}
                 </div>
@@ -900,6 +908,13 @@ const EditModal = ({ app, onClose, onSave }) => {
       }
     }
 
+    // Check for existing file errors
+    ['community', 'income', 'bonofide', 'marksheet12th'].forEach(field => {
+      if (errors[field] === 'File exceeds 1MB') {
+        newErrors[field] = 'File exceeds 1MB';
+      }
+    });
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return false;
@@ -1091,6 +1106,7 @@ const EditModal = ({ app, onClose, onSave }) => {
                         <ExternalLink className="w-3 h-3" /> View Current
                       </a>
                     )}
+                    {errors[doc.field] && <p className="text-[9px] bg-red-50 text-red-600 border border-red-100 rounded-lg px-2 py-1 font-black mt-2 text-center uppercase tracking-tighter shadow-sm">{errors[doc.field]}</p>}
                   </div>
                 ))}
               </div>
