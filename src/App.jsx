@@ -93,8 +93,10 @@ const CustomDatePicker = ({ label, value, onChange, error }) => {
   };
 
   const handleDayClick = (day) => {
-    const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-    onChange(selectedDate.toISOString().split('T')[0]);
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    onChange(`${year}-${month}-${dayStr}`);
     setIsOpen(false);
   };
 
@@ -106,8 +108,7 @@ const CustomDatePicker = ({ label, value, onChange, error }) => {
     dayGrid.push(i);
   }
 
-  const startYear = 1947;
-  const years = Array.from({ length: 2025 - 1947 + 1 }, (_, i) => 2025 - i);
+  const years = Array.from({ length: 79 }, (_, i) => new Date().getFullYear() - i);
 
   const selectedDate = value ? new Date(value) : null;
 
@@ -205,27 +206,9 @@ const PublicForm = () => {
 
   const [files, setFiles] = useState({ communityCertificate: null, incomeCertificate: null, bonofide: null, marksheet12th: null });
   const [errors, setErrors] = useState({});
-  const [isOtpVerified, setIsOtpVerified] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpInput, setOtpInput] = useState('');
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [otpError, setOtpError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [timer, setTimer] = useState(0);
-
-  useEffect(() => {
-    let interval;
-    if (timer > 0) interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    return () => clearInterval(interval);
-  }, [timer]);
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
 
   const validateField = (name, value) => {
     if (!value || value.trim() === '') return 'Required';
@@ -294,12 +277,7 @@ const PublicForm = () => {
       setErrors(prev => ({ ...prev, [name]: error }));
     }
     
-    if (name === 'phone') {
-      setOtpSent(false);
-      setIsOtpVerified(false);
-      setOtpError('');
-      setTimer(0);
-    }
+
   };
 
   const handleFileChange = (e, field) => {
@@ -314,76 +292,7 @@ const PublicForm = () => {
     setErrors(prev => ({ ...prev, [field]: null }));
   };
 
-  const handleSendOTP = async () => {
-    setOtpError('');
-    const cleanPhone = formData.phone.replace(/\D/g, '').slice(-10);
-    const cleanEmail = formData.email.trim().toLowerCase();
-    
-    if (cleanPhone.length < 10) {
-      setErrors(prev => ({ ...prev, phone: 'Enter a valid 10-digit number' }));
-      return;
-    }
 
-    const emailError = validateField('email', cleanEmail);
-    if (emailError) {
-      setErrors(prev => ({ ...prev, email: emailError }));
-      return;
-    }
-
-    setIsSendingOtp(true);
-    
-    try {
-      // Use the secure RPC function to check for duplicates bypassing RLS
-      const { data: duplicateCheck, error: rpcError } = await supabase.rpc('check_duplicates', {
-        p_phone: cleanPhone,
-        p_email: cleanEmail
-      });
-
-      if (rpcError) {
-        console.error('Duplicate Check Error:', rpcError);
-        // Fallback or ignore if RPC fails
-      } else if (duplicateCheck) {
-        if (duplicateCheck.phone_exists) {
-          setErrors(prev => ({ ...prev, phone: 'This mobile number is already registered' }));
-          setIsSendingOtp(false);
-          return;
-        }
-        if (duplicateCheck.email_exists) {
-          setErrors(prev => ({ ...prev, email: 'This email is already registered' }));
-          setIsSendingOtp(false);
-          return;
-        }
-      }
-
-      const { error } = await supabase.functions.invoke('send-whatsapp-otp', {
-        body: { phone: cleanPhone }
-      });
-      
-      if (error) throw error;
-      setOtpSent(true);
-      setTimer(60); 
-    } catch (err) {
-      setOtpError(err.message.includes('non-2xx') ? 'Verification service error' : err.message);
-    } finally {
-      setIsSendingOtp(false);
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    const cleanPhone = formData.phone.replace(/\D/g, '').slice(-10);
-    setOtpError('');
-    try {
-      const { data, error } = await supabase.functions.invoke('verify-whatsapp-otp', {
-        body: { phone: cleanPhone, otp: otpInput }
-      });
-      if (error || !data.success) throw new Error(error?.message || 'Invalid OTP');
-      setIsOtpVerified(true);
-      setOtpError('');
-      setTimer(0);
-    } catch (err) {
-      setOtpError(err.message.includes('non-2xx') ? 'Invalid or expired OTP' : err.message);
-    }
-  };
 
   const uploadFile = async (file, bucket, path) => {
     const fileExt = file.name.split('.').pop();
@@ -422,11 +331,6 @@ const PublicForm = () => {
       }
     });
 
-    if (!isOtpVerified) {
-      newErrors.phone = 'Mobile number not verified';
-      setOtpError('Verify your mobile number to continue');
-    }
-
     if (!termsAccepted) {
       newErrors.terms = 'Declaration required';
     }
@@ -443,9 +347,7 @@ const PublicForm = () => {
 
       // Determine specific message for the main error box
       let mainErrorMessage = 'Please fix the highlighted errors above';
-      if (Object.keys(newErrors).length === 1 && !isOtpVerified) {
-        mainErrorMessage = 'Please verify your mobile number with OTP to continue';
-      } else if (Object.keys(newErrors).length === 1 && !termsAccepted) {
+      if (Object.keys(newErrors).length === 1 && !termsAccepted) {
         mainErrorMessage = 'Please read and accept the terms and conditions';
       } else if (Object.keys(newErrors).length === 1) {
           const firstError = Object.values(newErrors)[0];
@@ -459,10 +361,35 @@ const PublicForm = () => {
 
     setIsSubmitting(true);
     try {
-      const { data: emailCheck } = await supabase.from('applications').select('email').eq('email', formData.email.trim().toLowerCase()).maybeSingle();
-      if (emailCheck) {
-        setErrors(prev => ({ ...prev, email: 'This email is already in use' }));
-        throw new Error('Please fix the duplicate email address');
+      const cleanPhone = formData.phone.replace(/\D/g, '').slice(-10);
+      const cleanEmail = formData.email.trim().toLowerCase();
+
+      const { data: duplicateCheck, error: rpcError } = await supabase.rpc('check_duplicates', {
+        p_phone: cleanPhone,
+        p_email: cleanEmail
+      });
+
+      if (rpcError) {
+        console.error('Duplicate Check Error:', rpcError);
+        // Fallback check if RPC fails
+        const { data: emailCheck } = await supabase.from('applications').select('email').eq('email', cleanEmail).maybeSingle();
+        if (emailCheck) {
+          setErrors(prev => ({ ...prev, email: 'This email is already in use' }));
+          throw new Error('Please fix the duplicate email address');
+        }
+      } else if (duplicateCheck) {
+        let hasDuplicate = false;
+        if (duplicateCheck.phone_exists) {
+          setErrors(prev => ({ ...prev, phone: 'This mobile number is already registered' }));
+          hasDuplicate = true;
+        }
+        if (duplicateCheck.email_exists) {
+          setErrors(prev => ({ ...prev, email: 'This email is already registered' }));
+          hasDuplicate = true;
+        }
+        if (hasDuplicate) {
+          throw new Error('Please fix the highlighted duplicate registration errors');
+        }
       }
 
       const [cUrl, iUrl, bUrl, mUrl] = await Promise.all([
@@ -529,67 +456,17 @@ const PublicForm = () => {
               <InputField label="Full Name" name="name" placeholder="As per SSLC certificate" icon={User} required value={formData.name} onChange={handleInputChange} error={errors.name} />
               <InputField label="Email Address" name="email" type="email" placeholder="student@example.com" icon={Mail} required value={formData.email} onChange={handleInputChange} error={errors.email} />
               
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Phone Number</label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input 
-                      name="phone" type="tel" placeholder="9876543210" required 
-                      value={formData.phone} onChange={handleInputChange}
-                      disabled={isOtpVerified}
-                      className={`w-full bg-white border ${errors.phone ? 'border-red-500' : 'border-slate-200'} rounded-xl py-3 pl-12 pr-5 text-slate-900 focus:outline-none focus:border-red-500 transition-all ${isOtpVerified ? 'bg-emerald-50 border-emerald-200' : ''}`}
-                    />
-                  </div>
-                  {!isOtpVerified && (
-                    <div className="flex flex-col gap-2">
-                      <button 
-                        type="button" onClick={handleSendOTP} 
-                        disabled={isSendingOtp || (otpSent && timer > 0)}
-                        className="px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isSendingOtp ? 'Sending...' : otpSent ? 'Resend OTP' : 'Get OTP'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-                {errors.phone && <p className="text-xs text-red-600 ml-1 font-medium">{errors.phone}</p>}
-                
-                {otpSent && !isOtpVerified && (
-                  <div className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Enter Verification Code</span>
-                      {timer > 0 ? (
-                        <span className="text-[10px] font-bold text-red-600">Expires in {formatTime(timer)}</span>
-                      ) : (
-                        <span className="text-[10px] font-bold text-red-600">OTP Expired</span>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <input 
-                        placeholder="Enter 6-digit OTP" maxLength={6}
-                        value={otpInput} onChange={(e) => setOtpInput(e.target.value)}
-                        disabled={timer === 0}
-                        className={`flex-1 bg-white border ${timer === 0 ? 'border-slate-100' : 'border-slate-200'} rounded-lg px-4 py-2.5 text-sm font-bold text-slate-900 focus:border-red-500 outline-none transition-all ${timer === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      />
-                      <button 
-                        type="button" onClick={handleVerifyOTP} 
-                        disabled={timer === 0}
-                        className="px-6 bg-red-600 text-white font-bold rounded-lg text-sm hover:bg-red-700 transition-all disabled:opacity-50 disabled:bg-slate-300 disabled:cursor-not-allowed"
-                      >
-                        Verify
-                      </button>
-                    </div>
-                    {timer === 0 && <p className="text-[10px] text-red-500 font-bold mt-2 text-center uppercase tracking-tighter">Please resend a new OTP to continue</p>}
-                  </div>
-                )}
-                {isOtpVerified && (
-                  <p className="text-xs text-emerald-600 font-bold ml-1 mt-1 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Verified
-                  </p>
-                )}
-                {otpError && <p className="text-xs text-red-600 ml-1 mt-1 font-medium">{otpError}</p>}
-              </div>
+              <InputField 
+                label="Phone Number" 
+                name="phone" 
+                type="tel" 
+                placeholder="9876543210" 
+                icon={Phone} 
+                required 
+                value={formData.phone} 
+                onChange={handleInputChange} 
+                error={errors.phone} 
+              />
 
               <CustomDatePicker 
                 label="Date of Birth" 
@@ -619,7 +496,7 @@ const PublicForm = () => {
                 onChange={handleInputChange} 
                 error={errors.passed_out_year}
                 placeholder="Select Year"
-                options={Array.from({ length: new Date().getFullYear() - 2020 + 1 }, (_, i) => (2020 + i).toString())}
+                options={Array.from({ length: 12 }, (_, i) => (new Date().getFullYear() - 11 + i).toString())}
               />
               <InputField label="Marks(Percentage)" name="marks_percentage" type="number" min="1" max="100" placeholder="e.g. 85" icon={FileText} required value={formData.marks_percentage} onChange={handleInputChange} error={errors.marks_percentage} />
             </FormSection>
@@ -646,13 +523,13 @@ const PublicForm = () => {
                 label="Start Year" name="college_start_year" icon={Calendar} required 
                 value={formData.college_start_year} onChange={handleInputChange} error={errors.college_start_year}
                 placeholder="Select Year"
-                options={Array.from({ length: 6 }, (_, i) => (new Date().getFullYear() + i).toString())}
+                options={Array.from({ length: 8 }, (_, i) => (new Date().getFullYear() - 6 + i).toString())}
               />
               <SelectField 
                 label="End Year" name="college_end_year" icon={Calendar} required 
                 value={formData.college_end_year} onChange={handleInputChange} error={errors.college_end_year}
                 placeholder="Select Year"
-                options={Array.from({ length: 6 }, (_, i) => (new Date().getFullYear() + i).toString())}
+                options={Array.from({ length: 12 }, (_, i) => (new Date().getFullYear() - 6 + i).toString())}
               />
             </FormSection>
 
