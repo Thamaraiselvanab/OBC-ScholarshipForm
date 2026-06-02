@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-ro
 import { 
   User, Mail, Phone, Calendar, MapPin, GraduationCap, FileText, 
   CheckCircle2, Loader2, ChevronRight, AlertCircle, Info, X,
-  ShieldCheck, LogOut, Download, ExternalLink, Search, Filter, Edit, Trash2
+  ShieldCheck, LogOut, Download, ExternalLink, Search, Filter, Edit, Trash2,
+  ZoomIn, ZoomOut, RotateCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@supabase/supabase-js';
@@ -693,7 +694,7 @@ const AdminLogin = () => {
   );
 };
 
-const EditModal = ({ app, onClose, onSave }) => {
+const EditModal = ({ app, onClose, onSave, onViewDoc }) => {
   const initialFieldOfStudy = ['Arts', 'Engineering', 'Medical'].includes(app.field_of_study) ? app.field_of_study : 'Others';
   const initialFieldOfStudyOther = initialFieldOfStudy === 'Others' ? app.field_of_study : '';
 
@@ -979,9 +980,13 @@ const EditModal = ({ app, onClose, onSave }) => {
                       )}
                     </div>
                     {doc.url && (
-                      <a href={doc.url} target="_blank" rel="noreferrer" className="mt-2 flex items-center justify-center gap-1 text-[9px] font-bold text-red-600 hover:underline">
+                      <button 
+                        type="button"
+                        onClick={() => onViewDoc(doc.url, doc.label, formData.name)}
+                        className="mt-2 flex items-center justify-center gap-1 text-[9px] font-bold text-red-600 hover:underline w-full cursor-pointer"
+                      >
                         <ExternalLink className="w-3 h-3" /> View Current
-                      </a>
+                      </button>
                     )}
                     {errors[doc.field] && <p className="text-[9px] bg-red-50 text-red-600 border border-red-100 rounded-lg px-2 py-1 font-black mt-2 text-center uppercase tracking-tighter shadow-sm">{errors[doc.field]}</p>}
                   </div>
@@ -1010,6 +1015,12 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingApp, setEditingApp] = useState(null);
+  const [viewingDoc, setViewingDoc] = useState(null);
+
+  const handleViewDoc = (url, label, studentName) => {
+    if (!url) return;
+    setViewingDoc({ url, label, studentName });
+  };
 
   useEffect(() => {
     fetchApplications();
@@ -1170,15 +1181,15 @@ const AdminDashboard = () => {
         </div>
       </nav>
 
-      <div className="p-4 md:p-8">
-        <div className="mb-8 flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
-          <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Scholarship Applications</h1>
+      <div className="p-4 md:px-8 md:py-4">
+        <div className="mb-3.5 flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">Scholarship Applications</h1>
           <div className="relative w-full lg:w-96">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
               type="text" placeholder="Search students..." 
               value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-12 pr-5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all shadow-sm"
+              className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-12 pr-5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all shadow-sm"
             />
           </div>
         </div>
@@ -1196,63 +1207,63 @@ const AdminDashboard = () => {
           <>
             {/* Desktop Table View */}
             <div className="hidden lg:block bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
-              <div className="overflow-x-auto custom-scrollbar">
+              <div className="overflow-auto max-h-[calc(100vh-175px)] custom-scrollbar">
                 <table className="w-full text-left border-collapse min-w-[2800px]">
                   <thead>
                     <tr className="bg-slate-900 text-white">
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Student Name</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Email Address</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Phone No</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">DOB</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Name</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Phone</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">School Name</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">School Address</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Year of Passing</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Marks %</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">College</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">College Address</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Field of Study</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Course</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Start Year</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">End Year</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Address</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Docs</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest">Actions</th>
+                      <th className="sticky left-0 top-0 z-30 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Student Name</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Email Address</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Phone No</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">DOB</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Name</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Parent Phone</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">School Name</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">School Address</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Year of Passing</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Marks %</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">College</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">College Address</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Field of Study</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Course</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Start Year</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">End Year</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Address</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Docs</th>
+                      <th className="sticky top-0 z-20 bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {filtered.map((app) => (
-                      <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-4 font-black text-slate-900 border-r border-slate-100 whitespace-nowrap">{app.name}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.email}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.phone}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap">{app.dob ? new Date(app.dob).toLocaleDateString('en-GB') : '—'}</td>
-                        <td className="px-4 py-4 text-xs font-black text-slate-900 border-r border-slate-100 whitespace-nowrap">{app.parents_name || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.parent_phone || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.school || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.school_address || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.passed_out_year || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-red-600 border-r border-slate-100">{app.marks_percentage || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.college_name || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.college_address || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.field_of_study || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.college_course || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.college_start_year || '—'}</td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-600 border-r border-slate-100">{app.college_end_year || '—'}</td>
-                        <td className="px-4 py-4 text-[10px] font-medium text-slate-500 border-r border-slate-100 max-w-[300px] truncate" title={app.address}>{app.address || '—'}</td>
-                        <td className="px-4 py-4">
+                      <tr key={app.id} className="group hover:bg-slate-50 transition-colors">
+                        <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 px-4 py-2.5 font-black text-slate-900 border-r-2 border-slate-200/80 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] whitespace-nowrap">{app.name}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100">{app.email}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100">{app.phone}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap">{app.dob ? new Date(app.dob).toLocaleDateString('en-GB') : '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-black text-slate-900 border-r border-slate-100 whitespace-nowrap">{app.parents_name || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100">{app.parent_phone || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.school || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.school_address || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100">{app.passed_out_year || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-red-600 border-r border-slate-100">{app.marks_percentage || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.college_name || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.college_address || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.field_of_study || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100 whitespace-nowrap max-w-[180px] truncate">{app.college_course || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100">{app.college_start_year || '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-100">{app.college_end_year || '—'}</td>
+                        <td className="px-4 py-2.5 text-[10px] font-medium text-slate-500 border-r border-slate-100 max-w-[300px] truncate" title={app.address}>{app.address || '—'}</td>
+                        <td className="px-4 py-2.5">
                           <div className="flex gap-2">
-                            <MiniDocLink href={app.community_certificate_url} label="C" />
-                            <MiniDocLink href={app.income_certificate_url} label="I" />
-                            <MiniDocLink href={app.bonofide_url} label="B" />
-                            <MiniDocLink href={app.marksheet_12th_url} label="M" />
+                            <MiniDocLink href={app.community_certificate_url} label="C" onClick={() => handleViewDoc(app.community_certificate_url, 'Community', app.name)} />
+                            <MiniDocLink href={app.income_certificate_url} label="I" onClick={() => handleViewDoc(app.income_certificate_url, 'Income', app.name)} />
+                            <MiniDocLink href={app.bonofide_url} label="B" onClick={() => handleViewDoc(app.bonofide_url, 'Bonafide', app.name)} />
+                            <MiniDocLink href={app.marksheet_12th_url} label="M" onClick={() => handleViewDoc(app.marksheet_12th_url, '12th Marksheet', app.name)} />
                           </div>
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-4 py-2.5">
                           <div className="flex gap-2">
-                            <button onClick={() => setEditingApp(app)} className="p-2 bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-600 rounded-lg transition-all border border-slate-200"><Edit className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => handleDelete(app.id)} className="p-2 bg-red-50 hover:bg-red-600 hover:text-white text-red-600 rounded-lg transition-all border border-red-100"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setEditingApp(app)} className="p-1.5 bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-600 rounded-lg transition-all border border-slate-200"><Edit className="w-3 h-3" /></button>
+                            <button onClick={() => handleDelete(app.id)} className="p-1.5 bg-red-50 hover:bg-red-600 hover:text-white text-red-600 rounded-lg transition-all border border-red-100"><Trash2 className="w-3 h-3" /></button>
                           </div>
                         </td>
                       </tr>
@@ -1345,10 +1356,10 @@ const AdminDashboard = () => {
                   </div>
                   <div className="mt-4 flex items-center justify-between bg-slate-50 -mx-5 -mb-5 p-3 px-5 border-t border-slate-100">
                     <div className="flex gap-2">
-                      <MiniDocLink href={app.community_certificate_url} label="C" />
-                      <MiniDocLink href={app.income_certificate_url} label="I" />
-                      <MiniDocLink href={app.bonofide_url} label="B" />
-                      <MiniDocLink href={app.marksheet_12th_url} label="M" />
+                      <MiniDocLink href={app.community_certificate_url} label="C" onClick={() => handleViewDoc(app.community_certificate_url, 'Community', app.name)} />
+                      <MiniDocLink href={app.income_certificate_url} label="I" onClick={() => handleViewDoc(app.income_certificate_url, 'Income', app.name)} />
+                      <MiniDocLink href={app.bonofide_url} label="B" onClick={() => handleViewDoc(app.bonofide_url, 'Bonafide', app.name)} />
+                      <MiniDocLink href={app.marksheet_12th_url} label="M" onClick={() => handleViewDoc(app.marksheet_12th_url, '12th Marksheet', app.name)} />
                     </div>
                     <span className="text-[9px] font-black text-slate-400">REF: {app.id.slice(0, 8)}</span>
                   </div>
@@ -1364,21 +1375,223 @@ const AdminDashboard = () => {
           app={editingApp} 
           onClose={() => setEditingApp(null)} 
           onSave={handleUpdate} 
+          onViewDoc={handleViewDoc}
+        />
+      )}
+
+      {viewingDoc && (
+        <DocViewerModal 
+          doc={viewingDoc} 
+          onClose={() => setViewingDoc(null)} 
         />
       )}
     </div>
   );
 };
 
-const MiniDocLink = ({ href, label }) => (
-  <a 
-    href={href} target="_blank" rel="noreferrer" 
-    className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-red-600 hover:text-white text-slate-600 rounded-lg text-[10px] font-black transition-all border border-slate-200"
-    title={`View ${label} Certificate`}
-  >
-    {label}
-  </a>
-);
+const MiniDocLink = ({ href, label, onClick }) => {
+  if (!href) return (
+    <span className="w-7 h-7 flex items-center justify-center bg-slate-50 text-slate-300 rounded-lg text-[10px] font-black border border-slate-100 cursor-not-allowed">
+      {label}
+    </span>
+  );
+  return (
+    <button 
+      type="button"
+      onClick={onClick}
+      className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-red-600 hover:text-white text-slate-600 rounded-lg text-[10px] font-black transition-all border border-slate-200 cursor-pointer"
+      title={`View ${label} Certificate`}
+    >
+      {label}
+    </button>
+  );
+};
+
+const DocViewerModal = ({ doc, onClose }) => {
+  const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [scale, setScale] = useState(1);
+  const { url, label, studentName } = doc;
+  
+  const fileExtension = url.split('?')[0].split('.').pop().toLowerCase();
+  const isPdf = fileExtension === 'pdf';
+
+  useEffect(() => {
+    setRotation(0);
+    setScale(1);
+    setLoading(true);
+  }, [url]);
+  
+  const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
+  const handleZoomIn = () => setScale((prev) => Math.min(prev + 0.25, 3));
+  const handleZoomOut = () => setScale((prev) => Math.max(prev - 0.25, 0.5));
+  const handleReset = () => {
+    setRotation(0);
+    setScale(1);
+  };
+  
+  const isRotated90 = rotation === 90 || rotation === 270;
+  const paddingVal = Math.max((scale - 1) * 350, 0) + (isRotated90 ? 200 : 0);
+  
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      
+      const safeStudentName = studentName ? studentName.replace(/[^a-zA-Z0-9]/g, '_') : 'Student';
+      const safeLabel = label ? label.replace(/[^a-zA-Z0-9]/g, '_') : 'Certificate';
+      link.download = `${safeStudentName}_${safeLabel}.${fileExtension}`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback
+      window.open(url, '_blank');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+        animate={{ opacity: 1, scale: 1, y: 0 }} 
+        className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200"
+      >
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight">{label} Certificate</h2>
+            {studentName && <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Student: {studentName}</p>}
+          </div>
+          <div className="flex items-center gap-3">
+            <button 
+              type="button"
+              onClick={handleDownload}
+              disabled={downloading}
+              className="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-4 py-2.5 rounded-xl font-black text-xs transition-all uppercase tracking-widest border border-emerald-100 disabled:opacity-50 cursor-pointer"
+            >
+              {downloading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Downloading...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Download</span>
+                </>
+              )}
+            </button>
+            <a 
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2.5 rounded-xl font-black text-xs transition-all uppercase tracking-widest border border-slate-200 cursor-pointer"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>New Tab</span>
+            </a>
+            <button onClick={onClose} className="p-2.5 hover:bg-white hover:shadow-md rounded-xl transition-all text-slate-400 hover:text-red-600 border border-transparent hover:border-slate-100 cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+        
+        <div className="flex-1 bg-slate-950 flex flex-col relative overflow-hidden min-h-[50vh]">
+          {/* Top Control Bar for Image Viewer */}
+          {!isPdf && (
+            <div className="bg-slate-900/95 border-b border-slate-800 px-6 py-2.5 flex items-center justify-center gap-4 shadow-md z-20">
+              <button 
+                type="button"
+                onClick={handleZoomOut} 
+                className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition-all cursor-pointer"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <span className="text-xs font-mono font-bold text-slate-400 min-w-[36px] text-center">
+                {Math.round(scale * 100)}%
+              </span>
+              <button 
+                type="button"
+                onClick={handleZoomIn} 
+                className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition-all cursor-pointer"
+                title="Zoom In"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+              <div className="w-px h-4 bg-slate-800" />
+              <button 
+                type="button"
+                onClick={handleRotate} 
+                className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Rotate 90°"
+              >
+                <RotateCw className="w-4 h-4" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">{rotation}°</span>
+              </button>
+              <div className="w-px h-4 bg-slate-800" />
+              <button 
+                type="button"
+                onClick={handleReset} 
+                className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition-all text-[10px] font-bold uppercase tracking-widest cursor-pointer"
+                title="Reset"
+              >
+                Reset
+              </button>
+            </div>
+          )}
+
+          {/* Certificate Viewport */}
+          <div className="flex-1 overflow-auto p-6 flex custom-scrollbar relative">
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-950/20 backdrop-blur-[2px] z-10 pointer-events-none">
+                <Loader2 className="w-10 h-10 text-white animate-spin drop-shadow-lg" />
+              </div>
+            )}
+            
+            {isPdf ? (
+              <iframe 
+                src={`${url}#toolbar=1`}
+                className="w-full h-full min-h-[60vh] rounded-lg border border-slate-800"
+                onLoad={() => setLoading(false)}
+                title={`${label} Certificate PDF`}
+              />
+            ) : (
+              <div 
+                className="m-auto relative flex items-center justify-center transition-all duration-200 ease-out min-w-max min-h-max shrink-0"
+                style={{ padding: `${paddingVal}px` }}
+              >
+                <img 
+                  src={url} 
+                  alt={`${label} Certificate`} 
+                  loading="eager"
+                  decoding="async"
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl transition-transform duration-200 ease-out origin-center"
+                  style={{ transform: `rotate(${rotation}deg) scale(${scale})` }}
+                  onLoad={() => setLoading(false)}
+                  onError={() => {
+                    setLoading(false);
+                    alert("Failed to load image preview.");
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 export default function App() {
   const [session, setSession] = useState(null);
